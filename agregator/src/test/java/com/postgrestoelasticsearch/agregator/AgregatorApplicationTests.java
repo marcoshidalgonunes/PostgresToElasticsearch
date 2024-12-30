@@ -1,10 +1,10 @@
-package com.postgrestoelasticsearch.api.api;
+package com.postgrestoelasticsearch.agregator;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class ApiApplicationTests {
+class AgregatorApplicationTests {
 
 	@Test
 	void contextLoads() {

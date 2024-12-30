@@ -1,13 +1,13 @@
-package com.postgrestoelasticsearch.api.api;
+package com.postgrestoelasticsearch.agregator;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class ApiApplication {
+public class AgregatorApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(ApiApplication.class, args);
+		SpringApplication.run(AgregatorApplication.class, args);
 	}
 
 }

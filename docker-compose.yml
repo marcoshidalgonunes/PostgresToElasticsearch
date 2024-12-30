@@ -17,17 +17,17 @@ services:
       - 8080:8080
 
   postgres:
-    image: quay.io/debezium/postgres:17
+    image: debezium-postgres
     container_name: postgres
     environment:
         POSTGRES_PASSWORD: postgres
-    command: postgres -c config_file=/home/config/postgresql.conf
+    command: postgres -c config_file=/home/config/postgres.conf
     networks:
       - lan-network
     ports:
         - 5432:5432
     volumes:
-        - ./postgresql.conf:/home/config/postgresql.conf
+        - ./postgres.conf:/home/config/postgres.conf
         - postgresdata:/var/lib/postgresql/data
     healthcheck:
         test: ['CMD-SHELL', 'pg_isready']
@@ -88,20 +88,30 @@ services:
         test: echo srvr | nc kafka 9092 || exit 1
         interval: 5s
         retries: 10
-
-  schema-registry:
-    image: confluentinc/cp-schema-registry
-    hostname: schema-registry
-    ports:
-        - 8081:8081
+   
+  connect:
+    image: debezium-connect 
+    container_name: connect
     depends_on:
-        kafka:
+      kafka:
         condition: service_healthy
+      postgres:
+        condition: service_healthy
+    networks:
+      - lan-network
+    ports:
+      - 8083:8083
     environment:
-        SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://kafka:29092
-        SCHEMA_REGISTRY_HOST_NAME: schema-registry
-        SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
-    
+        GROUP_ID: 1
+        CONFIG_STORAGE_TOPIC: my-connect-configs
+        OFFSET_STORAGE_TOPIC: my-connect-offsets
+        ADVERTISED_HOST_NAME: connect
+        ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092 
+        LISTENERS: PLAINTEXT://0.0.0.0:29092
+        BOOTSTRAP_SERVERS: kafka:29092
+        CONNECT_INTERNAL_KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+        CONNECT_INTERNAL_VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      
 volumes:
   postgresdata:
     external: true

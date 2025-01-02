@@ -1,21 +1,5 @@
 services:
 
-  api:
-    container_name: postgrestoelasticsearch-api 
-    image: ${DOCKER_REGISTRY-}postgrestoelasticsearch-api
-    build:
-      context: ./api/.
-      dockerfile: Dockerfile
-    depends_on:
-      elasticsearch:
-        condition: service_healthy
-    links:
-      - elasticsearch
-    networks:
-      - lan-network
-    ports:
-      - 8080:8080
-
   postgres:
     image: debezium-postgres
     container_name: postgres
@@ -111,6 +95,36 @@ services:
         BOOTSTRAP_SERVERS: kafka:29092
         CONNECT_INTERNAL_KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
         CONNECT_INTERNAL_VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+
+  agregator:
+    container_name: postgrestoelasticsearch-agregator 
+    image: ${DOCKER_REGISTRY-}postgrestoelasticsearch-agregator
+    build:
+      context: ./agregator/.
+      dockerfile: Dockerfile
+    depends_on:
+      kafka:
+        condition: service_healthy
+    links:
+      - kafka
+    networks:
+      - lan-network
+
+  api:
+    container_name: postgrestoelasticsearch-api 
+    image: ${DOCKER_REGISTRY-}postgrestoelasticsearch-api
+    build:
+      context: ./api/.
+      dockerfile: Dockerfile
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    links:
+      - elasticsearch
+    networks:
+      - lan-network
+    ports:
+      - 8080:8080
       
 volumes:
   postgresdata:

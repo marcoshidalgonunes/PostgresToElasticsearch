@@ -3,18 +3,19 @@ package com.postgrestoelasticsearch.agregator.config;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.StreamsConfig;
+import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.annotation.EnableKafka;
-import org.springframework.kafka.annotation.EnableKafkaStreams;
 import org.springframework.kafka.annotation.KafkaStreamsDefaultConfiguration;
 import org.springframework.kafka.config.KafkaStreamsConfiguration;
+import org.springframework.kafka.config.StreamsBuilderFactoryBean;
 
 @Configuration
 @EnableKafka
-@EnableKafkaStreams
 public class KafkaConfig {
     @Value("${spring.kafka.bootstrap-servers}")
     private String bootstrapAddress;
@@ -29,5 +30,13 @@ public class KafkaConfig {
         props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
 
         return new KafkaStreamsConfiguration(props);
+    }
+
+    @Bean
+    public FactoryBean<StreamsBuilder> streamBuilderFactoryBeam(KafkaStreamsConfiguration streamsConfig) {
+        StreamsBuilderFactoryBean factory = new StreamsBuilderFactoryBean(streamsConfig);
+        factory.setAutoStartup(false);
+
+        return factory;
     }
 }

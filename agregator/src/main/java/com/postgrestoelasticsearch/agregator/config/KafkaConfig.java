@@ -3,19 +3,26 @@ package com.postgrestoelasticsearch.agregator.config;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.StreamsConfig;
-import org.springframework.beans.factory.FactoryBean;
+import org.apache.kafka.streams.kstream.Consumed;
+import org.apache.kafka.streams.kstream.KStream;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.annotation.EnableKafka;
+import org.springframework.kafka.annotation.EnableKafkaStreams;
 import org.springframework.kafka.annotation.KafkaStreamsDefaultConfiguration;
 import org.springframework.kafka.config.KafkaStreamsConfiguration;
-import org.springframework.kafka.config.StreamsBuilderFactoryBean;
+import com.postgrestoelasticsearch.agregator.domain.models.Admission;
+import com.postgrestoelasticsearch.agregator.domain.models.Research;
+import com.postgrestoelasticsearch.agregator.domain.serdes.AdmissionSerde;
+import com.postgrestoelasticsearch.agregator.domain.serdes.ResearchSerde;
 
 @Configuration
 @EnableKafka
+@EnableKafkaStreams
 public class KafkaConfig {
     @Value("${spring.kafka.bootstrap-servers}")
     private String bootstrapAddress;
@@ -33,10 +40,12 @@ public class KafkaConfig {
     }
 
     @Bean
-    public FactoryBean<StreamsBuilder> streamBuilderFactoryBeam(KafkaStreamsConfiguration streamsConfig) {
-        StreamsBuilderFactoryBean factory = new StreamsBuilderFactoryBean(streamsConfig);
-        factory.setAutoStartup(false);
+    KStream<String, Admission> admissionStream(StreamsBuilder streamsBuilder) {
+        return streamsBuilder.stream("dbserver1.public.admission", Consumed.with(Serdes.String(), new AdmissionSerde()));
+    } 
 
-        return factory;
-    }
+    @Bean
+    KStream<String, Research> researchStream(StreamsBuilder streamsBuilder) {
+        return streamsBuilder.stream("dbserver1.public.research", Consumed.with(Serdes.String(), new ResearchSerde()));
+    } 
 }

@@ -132,3 +132,12 @@ kafka-console-consumer --bootstrap-server localhost:9092 --topic dbserver1.publi
 
 We can disconnect from Kafka container with the command `exit`.
 
+Now we will persist the join of Students and REsearch tables in ElasticSearch.
+
+To begin with, exec the following cURL command to read data from topics and joining them in ElasticSearch
+
+```
+curl localhost:8081/process
+```
+
+

@@ -1,5 +1,9 @@
+server:
+  port: 8081
 spring:
   application:
     name: agregator-app
   kafka:
     bootstrap-servers: localhost:9092
+  profiles: 
+    active: local

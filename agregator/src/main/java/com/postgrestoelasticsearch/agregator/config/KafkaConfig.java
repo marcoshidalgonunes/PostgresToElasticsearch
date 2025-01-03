@@ -12,6 +12,7 @@ import org.apache.kafka.streams.kstream.Consumed;
 import org.apache.kafka.streams.kstream.KTable;
 import org.apache.kafka.streams.kstream.Materialized;
 import org.apache.kafka.streams.state.KeyValueStore;
+import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,6 +20,8 @@ import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.annotation.EnableKafkaStreams;
 import org.springframework.kafka.annotation.KafkaStreamsDefaultConfiguration;
 import org.springframework.kafka.config.KafkaStreamsConfiguration;
+import org.springframework.kafka.config.StreamsBuilderFactoryBean;
+
 import com.postgrestoelasticsearch.agregator.domain.models.Admission;
 import com.postgrestoelasticsearch.agregator.domain.models.Research;
 import com.postgrestoelasticsearch.agregator.domain.models.ResearchBoost;
@@ -27,7 +30,6 @@ import com.postgrestoelasticsearch.agregator.domain.serdes.ResearchSerde;
 
 @Configuration
 @EnableKafka
-@EnableKafkaStreams
 public class KafkaConfig {
     @Value("${spring.kafka.bootstrap-servers}")
     private String bootstrapAddress;
@@ -42,6 +44,14 @@ public class KafkaConfig {
         props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
 
         return new KafkaStreamsConfiguration(props);
+    }
+
+    @Bean
+    public StreamsBuilderFactoryBean streamBuilderFactoryBeam(KafkaStreamsConfiguration streamsConfig) {
+        StreamsBuilderFactoryBean factory = new StreamsBuilderFactoryBean(streamsConfig);
+        factory.setAutoStartup(false);
+
+        return factory;
     }
 
     @Bean

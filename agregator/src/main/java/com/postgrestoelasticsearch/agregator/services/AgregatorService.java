@@ -20,33 +20,10 @@ import com.postgrestoelasticsearch.agregator.domain.serdes.ResearchSerde;
 public class AgregatorService {
 
     @Autowired
-    private KStream<String, Admission> streamAdmission;
-
-    @Autowired
-    private KStream<String, Research> streamResearch;
+    private KTable<Integer, ResearchBoost> boostTable;
 
     public void agregate() {
-
-        final AdmissionSerde admissionSerde = new AdmissionSerde();
-        final ResearchSerde researchSerde = new ResearchSerde();
-
-        final KTable<Integer, Admission> admissions = streamAdmission.selectKey((k, v) -> v.getStudent_id())
-                .toTable(Materialized.<Integer, Admission, KeyValueStore<Bytes, byte[]>>as("Admissions")
-                        .withKeySerde(Serdes.Integer())
-                        .withValueSerde(admissionSerde)
-                        .withCachingDisabled());
-
-        final KTable<Integer, Research> researchs = streamResearch.map((k, v) -> new KeyValue<>(v.getResearch(), v))
-                .toTable(Materialized.<Integer, Research, KeyValueStore<Bytes, byte[]>>as("Researchs")
-                        .withKeySerde(Serdes.Integer())
-                        .withValueSerde(researchSerde)
-                        .withCachingDisabled());
-
-        final KTable<Integer, ResearchBoost> boost = admissions.join(researchs, Admission::getStudent_id, (l, r) ->
-                new ResearchBoost(l.getStudent_id(), r.getResearch(), l.getAdmit_chance())
-        );
-
         System.out.println("boost");
-        boost.toStream().foreach((x, y) -> System.out.println(y));    
+        boostTable.toStream().foreach((x, y) -> System.out.println(y));    
     }
 }

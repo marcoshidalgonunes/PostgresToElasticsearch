@@ -1,5 +1,7 @@
 package com.postgrestoelasticsearch.agregator.domain.models;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -8,13 +10,18 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Admission {
-    int student_id;
+    @JsonProperty("student_id")
+    int studentId;
     
+    @JsonProperty("gre")
     int gre;
 
+    @JsonProperty("toefl")
     int toefl;
 
+    @JsonProperty("cpga")
     double cpga;
 
-    double admit_chance;
+    @JsonProperty("admit_chance")
+    double admitChance;
 }

@@ -96,21 +96,21 @@ services:
         CONNECT_INTERNAL_KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
         CONNECT_INTERNAL_VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
 
-  agregator:
-    container_name: agregator 
-    image: ${DOCKER_REGISTRY-}postgrestoelasticsearch-agregator
-    build:
-      context: ./agregator/.
-      dockerfile: Dockerfile
-    depends_on:
-      kafka:
-        condition: service_healthy
-    links:
-      - kafka
-    networks:
-      - lan-network
-    ports:
-      - 8081:8081
+  # agregator:
+  #   container_name: agregator 
+  #   image: ${DOCKER_REGISTRY-}postgrestoelasticsearch-agregator
+  #   build:
+  #     context: ./agregator/.
+  #     dockerfile: Dockerfile
+  #   depends_on:
+  #     kafka:
+  #       condition: service_healthy
+  #   links:
+  #     - kafka
+  #   networks:
+  #     - lan-network
+  #   ports:
+  #     - 8081:8081
 
   # api:
   #   container_name: api 

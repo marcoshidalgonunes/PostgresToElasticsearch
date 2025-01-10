@@ -9,13 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Research {
+public class StudentId {
     @JsonProperty("student_id")
-    int studentId;
-
-    @JsonProperty("rating")
-    int rating;
-
-    @JsonProperty("research")
-    int research;
+    int studentId;   
 }

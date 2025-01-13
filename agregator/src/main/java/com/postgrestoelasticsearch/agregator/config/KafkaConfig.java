@@ -44,6 +44,7 @@ public class KafkaConfig {
         props.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, 2000);
         props.put(StreamsConfig.CACHE_MAX_BYTES_BUFFERING_DOC, 10000000);
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+        props.put(ConsumerConfig.ALLOW_AUTO_CREATE_TOPICS_CONFIG, "true");
 
         return new KafkaStreamsConfiguration(props);
     }

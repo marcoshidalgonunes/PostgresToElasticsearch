@@ -3,13 +3,16 @@ package com.postgrestoelasticsearch.agregator.config;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
+import org.apache.kafka.common.utils.Bytes;
+import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.kstream.Consumed;
 import org.apache.kafka.streams.kstream.KTable;
 import org.apache.kafka.streams.kstream.Materialized;
+import org.apache.kafka.streams.state.KeyValueStore;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,12 +20,11 @@ import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.annotation.EnableKafkaStreams;
 import org.springframework.kafka.annotation.KafkaStreamsDefaultConfiguration;
 import org.springframework.kafka.config.KafkaStreamsConfiguration;
-
-
 import com.postgrestoelasticsearch.agregator.domain.models.Admission;
 import com.postgrestoelasticsearch.agregator.domain.models.Research;
 import com.postgrestoelasticsearch.agregator.domain.models.ResearchBoost;
 import com.postgrestoelasticsearch.agregator.domain.serdes.AdmissionSerde;
+import com.postgrestoelasticsearch.agregator.domain.serdes.ResearchBoostSerde;
 import com.postgrestoelasticsearch.agregator.domain.serdes.ResearchSerde;
 import com.postgrestoelasticsearch.agregator.domain.serdes.StudentIdSerde;
 
@@ -42,9 +44,7 @@ public class KafkaConfig {
         props.put(StreamsConfig.APPLICATION_ID_CONFIG, appplicationId);
         props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
         props.put(StreamsConfig.COMMIT_INTERVAL_MS_CONFIG, 2000);
-        props.put(StreamsConfig.CACHE_MAX_BYTES_BUFFERING_DOC, 10000000);
-        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-        props.put(ConsumerConfig.ALLOW_AUTO_CREATE_TOPICS_CONFIG, "true");
+        props.put(StreamsConfig.CACHE_MAX_BYTES_BUFFERING_DOC, 0);
 
         return new KafkaStreamsConfiguration(props);
     }
@@ -52,19 +52,31 @@ public class KafkaConfig {
     @Bean
     KTable<Integer, ResearchBoost> boostTable(StreamsBuilder streamsBuilder) {
         final AdmissionSerde admissionSerde = new AdmissionSerde();
+        final ResearchBoostSerde researchBoostSerde = new ResearchBoostSerde();
         final ResearchSerde researchSerde = new ResearchSerde();
         final StudentIdSerde studentIdSerde = new StudentIdSerde();
+        final Serde<Integer> integerSerde = Serdes.Integer();
 
         final KTable<Integer, Admission> admissions = streamsBuilder.stream("dbserver1.public.admission", Consumed.with(studentIdSerde, admissionSerde))
-            .selectKey((k, v) -> v.getStudentId())
-            .toTable(Materialized.with(Serdes.Integer(), admissionSerde));
+            .map((k, v) -> new KeyValue<>(v.getStudentId(), v))
+            .toTable(Materialized.<Integer, Admission, KeyValueStore<Bytes, byte[]>>as("admissions-view")
+                .withKeySerde(integerSerde)
+                .withValueSerde(admissionSerde)
+                .withCachingDisabled());
 
         final KTable<Integer, Research> researchs = streamsBuilder.stream("dbserver1.public.research", Consumed.with(studentIdSerde, researchSerde))
-            .selectKey((k, v) -> v.getStudentId())
-            .toTable(Materialized.with(Serdes.Integer(), researchSerde));
+            .map((k, v) -> new KeyValue<>(v.getStudentId(), v))
+            .toTable(Materialized.<Integer, Research, KeyValueStore<Bytes, byte[]>>as("researchs-view")
+                .withKeySerde(integerSerde)
+                .withValueSerde(researchSerde)
+                .withCachingDisabled());
 
-        return admissions.join(researchs, Admission::getStudentId, (l, r) ->
-            new ResearchBoost(l.getStudentId(), r.getResearch(), l.getAdmitChance())
-        );
+        return admissions.leftJoin(researchs,  
+            (admission, research) -> new ResearchBoost(admission.getStudentId(), research.getResearch(), admission.getAdmitChance()),
+            Materialized.<Integer, ResearchBoost, KeyValueStore<Bytes, byte[]>>as("researchs-boost-view")
+                .withKeySerde(integerSerde)
+                .withValueSerde(researchBoostSerde)
+                .withCachingDisabled());
+
     }    
 }

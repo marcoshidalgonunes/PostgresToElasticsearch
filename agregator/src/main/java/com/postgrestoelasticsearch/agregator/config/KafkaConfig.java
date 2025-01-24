@@ -17,9 +17,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.annotation.EnableKafka;
-import org.springframework.kafka.annotation.EnableKafkaStreams;
 import org.springframework.kafka.annotation.KafkaStreamsDefaultConfiguration;
 import org.springframework.kafka.config.KafkaStreamsConfiguration;
+import org.springframework.kafka.config.StreamsBuilderFactoryBean;
+
 import com.postgrestoelasticsearch.agregator.domain.models.Admission;
 import com.postgrestoelasticsearch.agregator.domain.models.Research;
 import com.postgrestoelasticsearch.agregator.domain.models.ResearchBoost;
@@ -30,7 +31,6 @@ import com.postgrestoelasticsearch.agregator.domain.serdes.StudentIdSerde;
 
 @Configuration
 @EnableKafka
-@EnableKafkaStreams
 public class KafkaConfig {
     @Value("${spring.kafka.bootstrap-servers}")
     private String bootstrapAddress;
@@ -47,6 +47,11 @@ public class KafkaConfig {
         props.put(StreamsConfig.CACHE_MAX_BYTES_BUFFERING_DOC, 0);
 
         return new KafkaStreamsConfiguration(props);
+    }
+
+    @Bean
+    StreamsBuilderFactoryBean streamsBuilderFactoryBean(KafkaStreamsConfiguration kafkaStreamsConfig) {
+        return new StreamsBuilderFactoryBean(kafkaStreamsConfig);
     }
 
     @Bean
@@ -77,6 +82,5 @@ public class KafkaConfig {
                 .withKeySerde(integerSerde)
                 .withValueSerde(researchBoostSerde)
                 .withCachingDisabled());
-
     }    
 }

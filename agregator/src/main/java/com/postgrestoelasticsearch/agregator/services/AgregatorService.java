@@ -9,7 +9,6 @@ import com.postgrestoelasticsearch.agregator.domain.models.ResearchBoost;
 import com.postgrestoelasticsearch.agregator.repositories.ResearchBoostRepository;
 
 @Service
-//@Component
 public class AgregatorService {
 
     @Autowired

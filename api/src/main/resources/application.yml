@@ -1,0 +1,11 @@
+server:
+  port: 8081
+spring:
+  application:
+    name: api-app
+  data:
+    elasticsearch:
+      repositories:
+        enabled: true
+  profiles: 
+    active: local

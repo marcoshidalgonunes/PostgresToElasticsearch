@@ -1,21 +1,21 @@
 package com.postgrestoelasticsearch.agregator.domain.models;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.elasticsearch.annotations.Document;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
+@Document(indexName = "boost")
 @AllArgsConstructor
 @NoArgsConstructor
 public class ResearchBoost {
-    @JsonProperty("student_id")
+    @Id
     int studentId;
 
-    @JsonProperty("research")
     int research;
 
-    @JsonProperty("admit_chance")
     double admitChance;
 }

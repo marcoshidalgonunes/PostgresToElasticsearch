@@ -1,3 +1,5 @@
 spring:
+  elasticsearch:
+    uris: elasticsearch:9200
   kafka:
     bootstrap-servers: kafka:29092

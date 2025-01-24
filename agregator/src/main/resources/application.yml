@@ -3,7 +3,9 @@ server:
 spring:
   application:
     name: agregator-app
-  kafka:
-    bootstrap-servers: localhost:9092
+  data:
+    elasticsearch:
+      repositories:
+        enabled: true
   profiles: 
     active: local

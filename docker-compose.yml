@@ -32,11 +32,12 @@ services:
         - discovery.type=single-node
         - http.port=9200
         - http.cors.enabled=true
-        - http.cors.allow-origin=http://grafana:3000,http://127.0.0.1:3000
+        - http.cors.allow-origin=http://grafana:3000,http://127.0.0.1:8081
         - http.cors.allow-headers=X-Requested-With,X-Auth-Token,Content-Type,Content-Length,Authorization
         - http.cors.allow-credentials=true
         - bootstrap.memory_lock=true      
         - xpack.monitoring.enabled=true
+        - xpack.security.enabled=false
         - xpack.watcher.enabled=false
         - 'ES_JAVA_OPTS=-Xms512m -Xmx512m'
     healthcheck:

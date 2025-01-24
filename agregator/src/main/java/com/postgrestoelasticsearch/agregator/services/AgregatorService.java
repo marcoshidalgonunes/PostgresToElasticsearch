@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 
 import com.postgrestoelasticsearch.agregator.components.BoostKafkaComponent;
 import com.postgrestoelasticsearch.agregator.domain.models.ResearchBoost;
+import com.postgrestoelasticsearch.agregator.repositories.ResearchBoostRepository;
 
 @Service
 //@Component
@@ -14,17 +15,25 @@ public class AgregatorService {
     @Autowired
     private BoostKafkaComponent boostKafkaComponent;
 
+    @Autowired 
+    private ResearchBoostRepository researchBoostRepository;
+
     public void process() {
-        boostKafkaComponent.start();
+        try {
+            boostKafkaComponent.start();
 
-        KeyValueIterator<Integer, ResearchBoost> topics = boostKafkaComponent.getTopics();
-        topics.forEachRemaining(entry -> {
-            Integer key = entry.key;
-            ResearchBoost value = entry.value;
-            System.out.println(key + "={\"student_id\":" + value.getStudentId() + ",\"research\":" + value.getResearch() + ",\"admit_chance\":" + value.getAdmitChance() + "}");
-        });
-
-        boostKafkaComponent.stop();
+            KeyValueIterator<Integer, ResearchBoost> topics = boostKafkaComponent.getTopics();
+            topics.forEachRemaining(entry -> {
+                if (!researchBoostRepository.findById(entry.key).isPresent()) {
+                    ResearchBoost boost = researchBoostRepository.save(entry.value);
+                    System.out.println("Saved {\"studentId\":" + boost.getStudentId() + ",\"research\":" + boost.getResearch() + ",\"admitChance\":" + boost.getAdmitChance() + "}");
+                }
+            });
+    
+            boostKafkaComponent.stop();            
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
 

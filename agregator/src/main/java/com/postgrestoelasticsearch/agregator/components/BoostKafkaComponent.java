@@ -17,7 +17,6 @@ public class BoostKafkaComponent implements KafkaComponent<Integer, ResearchBoos
     @Autowired
     private StreamsBuilderFactoryBean streamsBuilderFactoryBean;
 
-    @SuppressWarnings("null")
     @Override
     public KeyValueIterator<Integer, ResearchBoost> getTopics() {
         KafkaStreams kafkaStreams = streamsBuilderFactoryBean.getKafkaStreams();

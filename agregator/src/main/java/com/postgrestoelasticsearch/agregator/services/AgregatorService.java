@@ -17,22 +17,22 @@ public class AgregatorService {
     @Autowired 
     private ResearchBoostRepository researchBoostRepository;
 
-    public void process() {
-        try {
-            boostKafkaComponent.start();
+    public void create() {
+        boostKafkaComponent.start();
 
-            KeyValueIterator<Integer, ResearchBoost> topics = boostKafkaComponent.getTopics();
-            topics.forEachRemaining(entry -> {
-                if (!researchBoostRepository.findById(entry.key).isPresent()) {
-                    ResearchBoost boost = researchBoostRepository.save(entry.value);
-                    System.out.println("Saved {\"studentId\":" + boost.getStudentId() + ",\"research\":" + boost.getResearch() + ",\"admitChance\":" + boost.getAdmitChance() + "}");
-                }
-            });
-    
-            boostKafkaComponent.stop();            
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        KeyValueIterator<Integer, ResearchBoost> topics = boostKafkaComponent.getTopics();
+        topics.forEachRemaining(entry -> {
+            if (!researchBoostRepository.findById(entry.key).isPresent()) {
+                ResearchBoost boost = researchBoostRepository.save(entry.value);
+                System.out.println("Saved {\"studentId\":" + boost.getStudentId() + ",\"research\":" + boost.getResearch() + ",\"admitChance\":" + boost.getAdmitChance() + "}");
+            }
+        });
+
+        boostKafkaComponent.stop();   
+    }
+
+    public void delete() {
+        researchBoostRepository.deleteAll();
     }
 }
 

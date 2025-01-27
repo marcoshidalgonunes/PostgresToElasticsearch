@@ -19,7 +19,7 @@ public class AgregatorController {
     @GetMapping("/process")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     public ResponseEntity<Void> process() {
-        service.process();
+        service.create();
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

@@ -21,7 +21,7 @@ public class QueryController {
     }
     
     @ResponseStatus(HttpStatus.OK)
-    @GetMapping
+    @GetMapping("/boosts")
     public List<ResearchBoost> getAll() {
         return queryService.getAll();
     }

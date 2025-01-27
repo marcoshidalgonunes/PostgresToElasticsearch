@@ -149,7 +149,8 @@ If needed, you can delete the ElasticSearch index calling the following endpoint
 curl -X DELETE http://localhost:8081/agregator
 ```
 
-## Query data into ElasticSearch
+
+## Query data from ElasticSearch
 
 The api application has endpoints to query ElasticSearch data populated with agregator application.
 

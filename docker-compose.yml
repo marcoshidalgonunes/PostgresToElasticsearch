@@ -98,37 +98,40 @@ services:
         CONNECT_INTERNAL_KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
         CONNECT_INTERNAL_VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
 
-  # agregator:
-  #   container_name: agregator 
-  #   image: ${DOCKER_REGISTRY-}postgrestoelasticsearch-agregator
-  #   build:
-  #     context: ./agregator/.
-  #     dockerfile: Dockerfile
-  #   depends_on:
-  #     kafka:
-  #       condition: service_healthy
-  #   links:
-  #     - kafka
-  #   networks:
-  #     - lan-network
-  #   ports:
-  #     - 8081:8081
+  agregator:
+    container_name: agregator 
+    image: ${DOCKER_REGISTRY-}postgrestoelasticsearch-agregator
+    build:
+      context: ./agregator/.
+      dockerfile: Dockerfile
+    depends_on:
+      kafka:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy        
+    links:
+      - kafka
+      - elasticsearch
+    networks:
+      - lan-network
+    ports:
+      - 8081:8081
 
-  # api:
-  #   container_name: api 
-  #   image: ${DOCKER_REGISTRY-}postgrestoelasticsearch-api
-  #   build:
-  #     context: ./api/.
-  #     dockerfile: Dockerfile
-  #   depends_on:
-  #     elasticsearch:
-  #       condition: service_healthy
-  #   links:
-  #     - elasticsearch
-  #   networks:
-  #     - lan-network
-  #   ports:
-  #     - 8080:8080
+  api:
+    container_name: api 
+    image: ${DOCKER_REGISTRY-}postgrestoelasticsearch-api
+    build:
+      context: ./api/.
+      dockerfile: Dockerfile
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    links:
+      - elasticsearch
+    networks:
+      - lan-network
+    ports:
+      - 8082:8082
       
 volumes:
   postgresdata:

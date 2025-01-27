@@ -2,11 +2,14 @@ package com.postgrestoelasticsearch.api.services;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.postgrestoelasticsearch.api.models.Agregation;
 import com.postgrestoelasticsearch.api.models.ResearchBoost;
+import com.postgrestoelasticsearch.api.models.ResearchChance;
 import com.postgrestoelasticsearch.api.repositories.ResearchBoostRepository;
 
 @Service
@@ -15,11 +18,26 @@ public class QueryBoostService {
     @Autowired 
     private ResearchBoostRepository researchBoostRepository;
 
-    public List<ResearchBoost> getAll() {
+    public List<ResearchBoost> getByResearch(int research) {
         List<ResearchBoost> boosts = new ArrayList<>();
-        researchBoostRepository.findAll()
+        researchBoostRepository.findByResearch(research)
             .forEach(boosts::add);
         
         return boosts;
+    }
+
+    public ResearchChance getAverageChance(int research) {
+        Agregation agregation = new Agregation(0.0, 0);
+        researchBoostRepository.findByResearch(research)
+            .forEach(boost -> {
+                agregation.setSumChance(agregation.getSumChance() + boost.getAdmitChance());
+                agregation.setCountChance(agregation.getCountChance() + 1);
+            });
+        
+        return new ResearchChance(research, agregation.getSumChance() / agregation.getCountChance());
+    }
+
+    public Optional<ResearchBoost> getById(int studentId) {
+        return researchBoostRepository.findById(studentId);
     }
 }

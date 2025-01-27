@@ -7,5 +7,5 @@ import com.postgrestoelasticsearch.api.models.ResearchBoost;
 
 @Repository
 public interface ResearchBoostRepository extends ElasticsearchRepository<ResearchBoost, Integer> {
-    
+    Iterable<ResearchBoost> findByResearch(int research);
 }

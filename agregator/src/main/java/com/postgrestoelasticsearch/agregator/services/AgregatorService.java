@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 
 import com.postgrestoelasticsearch.agregator.components.BoostKafkaComponent;
 import com.postgrestoelasticsearch.agregator.domain.models.ResearchBoost;
+import com.postgrestoelasticsearch.agregator.domain.models.Summary;
 import com.postgrestoelasticsearch.agregator.repositories.ResearchBoostRepository;
 
 @Service
@@ -17,18 +18,24 @@ public class AgregatorService {
     @Autowired 
     private ResearchBoostRepository researchBoostRepository;
 
-    public void create() {
+    public Summary create() {
+        Summary summary = new Summary(0, 0);
+
         boostKafkaComponent.start();
 
-        KeyValueIterator<Integer, ResearchBoost> topics = boostKafkaComponent.getTopics();
-        topics.forEachRemaining(entry -> {
-            if (!researchBoostRepository.findById(entry.key).isPresent()) {
-                ResearchBoost boost = researchBoostRepository.save(entry.value);
-                System.out.println("Saved {\"studentId\":" + boost.getStudentId() + ",\"research\":" + boost.getResearch() + ",\"admitChance\":" + boost.getAdmitChance() + "}");
-            }
-        });
+        try (KeyValueIterator<Integer, ResearchBoost> topics = boostKafkaComponent.getTopics()) {
+            topics.forEachRemaining(entry -> {
+                summary.setReadedTopics(summary.getReadedTopics() + 1);
+                if (!researchBoostRepository.findById(entry.key).isPresent()) {
+                    researchBoostRepository.save(entry.value);
+                    summary.setWrittenTopics(summary.getWrittenTopics() + 1);
+                }
+            });
+        }
 
         boostKafkaComponent.stop();   
+
+        return summary;
     }
 
     public void delete() {

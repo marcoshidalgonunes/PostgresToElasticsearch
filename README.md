@@ -92,7 +92,7 @@ PRIMARY KEY (student_id));
 
 We can disconnect from Postgres container with the command `exit`.
 
-## Use Postgres database as a source to Kafka and prepare data to sink.
+## Use Postgres database as a source to Kafka
 
 The `postgres-source.json` file contains the configuration settings needed to
 sink all of the students database to Kafka.
@@ -132,20 +132,45 @@ kafka-console-consumer --bootstrap-server localhost:9092 --topic dbserver1.publi
 
 We can disconnect from Kafka container with the command `exit`.
 
-Now we will persist the join of Students and REsearch tables in ElasticSearch.
+## Agregate topics into ElasticSearch
 
-To begin with, start the agregator application.
-
-```
-cd agregator
-
-mvn spring-boot:run
-```
-
-Then exec the following cURL command to read data from topics and joining them in ElasticSearch
+Now we will persist the join of Students and Research tables in an ElasticSearch index. To do it , call the create endpoint of agregator application.
 
 ```
-curl localhost:8081/process
+curl -X POST http://localhost:8081/agregator
+
 ```
+
+The endpoint return counters of topics readed and written in ElasticSearch. Since the write occurs only if the topic is not recorded, in subsequent runs the counters can differ.
+
+If needed, you can delete the ElasticSearch index calling the following endpoint.
+
+```
+curl -X DELETE http://localhost:8081/agregator
+```
+
+## Query data into ElasticSearch
+
+The api application has endpoints to query ElasticSearch data populated with agregator application.
+
+### Query students chances to be enrolled in a research
+
+```
+curl http://localhost:8082/api/boosts/:research
+```
+
+### Query a specific student chance to enroll in a research
+
+```
+curl http://localhost:8082/api/boosts/chance/:studentId
+```
+
+
+### Query average chance of enrollment in a research
+
+```
+curl http://localhost:8082/api/boosts/research/chance/:research
+```
+
 
 

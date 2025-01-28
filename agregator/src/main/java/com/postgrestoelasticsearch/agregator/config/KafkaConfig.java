@@ -76,7 +76,7 @@ public class KafkaConfig {
                 .withValueSerde(researchSerde)
                 .withCachingDisabled());
 
-        return admissions.leftJoin(researchs,  
+        return admissions.leftJoin(researchs, Admission::getStudentId, 
             (admission, research) -> new ResearchBoost(admission.getStudentId(), research.getResearch(), admission.getAdmitChance()),
             Materialized.<Integer, ResearchBoost, KeyValueStore<Bytes, byte[]>>as("researchs-boost-view")
                 .withKeySerde(integerSerde)
